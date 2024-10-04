@@ -1,0 +1,63 @@
+panda\ops.o: user\ops.c
+panda\ops.o: C:\Keil5 MDK\ARM\ARMCC\Bin\..\include\string.h
+panda\ops.o: user\ops.h
+panda\ops.o: ../Core/Inc/usart.h
+panda\ops.o: ../Core/Inc/main.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
+panda\ops.o: ../Core/Inc/stm32f4xx_hal_conf.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
+panda\ops.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
+panda\ops.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f427xx.h
+panda\ops.o: ../Drivers/CMSIS/Include/core_cm4.h
+panda\ops.o: C:\Keil5 MDK\ARM\ARMCC\Bin\..\include\stdint.h
+panda\ops.o: ../Drivers/CMSIS/Include/cmsis_version.h
+panda\ops.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
+panda\ops.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
+panda\ops.o: ../Drivers/CMSIS/Include/mpu_armv7.h
+panda\ops.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
+panda\ops.o: C:\Keil5 MDK\ARM\ARMCC\Bin\..\include\stddef.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_exti.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_can.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
+panda\ops.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+panda\ops.o: C:\Keil5 MDK\ARM\ARMCC\Bin\..\include\stdio.h
+panda\ops.o: ../Core/Inc/struct_typedef.h
+panda\ops.o: ../Application/chassis_task.h
+panda\ops.o: ./user/Can_recive.h
+panda\ops.o: ../Core/Inc/can.h
+panda\ops.o: ./user/pid.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+panda\ops.o: ../Core/Inc/FreeRTOSConfig.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
+panda\ops.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
+panda\ops.o: ../Application/remote_task.h
+panda\ops.o: ./user/bsp_rc.h
+panda\ops.o: C:\Keil5 MDK\ARM\ARMCC\Bin\..\include\math.h
+panda\ops.o: ../Application/filter.h
+panda\ops.o: ../Application/Paw_Task.h
