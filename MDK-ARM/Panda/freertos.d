@@ -49,3 +49,8 @@ panda\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
 panda\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 panda\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 panda\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
+panda\freertos.o: ../Application/detect_task.h
+panda\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+panda\freertos.o: ../Core/Inc/usart.h
+panda\freertos.o: ../Application/remote_task.h
+panda\freertos.o: ./user/bsp_rc.h

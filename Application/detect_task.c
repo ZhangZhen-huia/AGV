@@ -32,7 +32,7 @@ uint32_t detect_task_stack;
 error_t error_list[ERROR_LIST_LENGHT + 1];
 
 
-void detect_task(void const * argument)
+void detect_task(void *pvParameters)
 {
 	 static uint32_t system_time;
    system_time = xTaskGetTickCount();//获取自 vTaskStartScheduler 被调用起的 tick 数

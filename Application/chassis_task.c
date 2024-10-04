@@ -80,7 +80,7 @@ fp32 Find_min_Angle(int16_t angle1,fp32 angle2);
 
 /*----------------------------------------------------------------------TASK---------------------------------------------------------------------*/
 
-void chassis_task(void const * argument)
+void chassis_task(void *pvParameters)
 {
 	remote_control_chassis_init(&chassis_move);
 
@@ -191,7 +191,7 @@ static void Chassis_remote_control_loop(chassis_move_t *chassis_move_control_loo
 	//遥控器数值获取加死区限制和平均滤波
 	chassis_rc_to_control_vector(chassis_move_control_loop); //获取遥控器值
 	Remote_chassis_AGV_wheel_speed(chassis_move_control_loop);
-	Robot_coordinate(&chassis_move_control_loop->absolute_chassis_speed,yaw_diff);
+	Robot_coordinate(&chassis_move_control_loop->absolute_chassis_speed,final_yaw);
 	
 	//pid计算
 	Remote_pid_caculate(chassis_move_control_loop);

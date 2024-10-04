@@ -60,5 +60,5 @@ static void detect_init(uint32_t time);
 unsigned char toe_is_error(uint8_t toe);
 void detect_hook(uint8_t toe);
 
-void detect_task(void const * argument);
+void detect_task(void *pvParameters);
 #endif

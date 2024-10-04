@@ -1,11 +1,8 @@
-#ifndef __IMU_TASK_H__
-#define __IMU_TASK_H__
+#pragma once 
 
 
 #include "main.h"
 
-
-
-#endif
+void imu_task(void *pvParameters);
 
 

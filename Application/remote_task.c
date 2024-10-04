@@ -84,7 +84,7 @@ const RC_ctrl_t *get_remote_control_point(void)
     return &rc_ctrl;
 }
 
-void remote_task(void const * argument)
+void remote_task(void *pvParameters)
 {
 	remote_control_init();
 	while(1)

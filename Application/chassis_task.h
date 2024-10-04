@@ -169,7 +169,7 @@ extern chassis_move_t chassis_move;//底盘运动数据
   * @param[in]      pvParameters: 空
   * @retval         none
   */
-extern void chassis_task(void const *pvParameters);
+extern void chassis_task(void *pvParameters);
 
 
 
