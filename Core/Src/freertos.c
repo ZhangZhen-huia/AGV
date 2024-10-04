@@ -76,7 +76,7 @@
 
 /*imu任务*/
 /*-摘要-*/ #define IMU
-/*-优先-*/ #define IMU_TASK_PRIO 4
+/*-优先-*/ #define IMU_TASK_PRIO 0
 /*-堆栈-*/ #define IMU_STK_SIZE 100
 /*-声明-*/extern void imu_task(void *pvParameters);
 /*-句柄-*/TaskHandle_t    imu_TASKHandle;
@@ -95,6 +95,12 @@
 /*-声明-*/extern void led_task(void *pvParameters);
 /*-句柄-*/TaskHandle_t    led_TASKHandle;
 
+/*控制任务*/
+/*-摘要-*/ #define CONTROL
+/*-优先-*/ #define CONTROL_TASK_PRIO 3
+/*-堆栈-*/ #define CONTROL_STK_SIZE 100
+/*-声明-*/extern void control_task(void *pvParameters);
+/*-句柄-*/TaskHandle_t    control_TASKHandle;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -191,6 +197,7 @@ void start_task(void const * argument)
 		mTaskCreate(IMU,imu);
 		mTaskCreate(REMOTE,remote);
 		mTaskCreate(LED,led);
+		mTaskCreate(CONTROL,control);
 		
 		//删除自己
 		vTaskDelete(START_TASKHandle);
@@ -202,5 +209,8 @@ void start_task(void const * argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-
+void control_task(void *pvParameters)
+{
+	
+}
 /* USER CODE END Application */
