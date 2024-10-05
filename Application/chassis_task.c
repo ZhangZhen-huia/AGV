@@ -2,13 +2,10 @@
 #include "pid.h"
 #include "bsp_imu.h"
 
-chassis_move_t chassis_move;//底盘运动数据
-float yaw_diff=0;
-extern int16_t final_yaw;
 
 
 // 遥控器模式所有初始化
-static void Chassis_control_chassis_init(chassis_move_t* chassis_move_init);
+static void Chassis_init(chassis_move_t* chassis_move_init);
 
 //遥控器控制模式，获取8个电机的速度并且进行PID计算
 static void Chassis_control_loop(chassis_move_t *chassis_move_control_loop);
@@ -26,7 +23,7 @@ void angle_judge(chassis_move_t *chassis_move_control_loop);
 void Chassis_mode_change(chassis_move_t *chassis_move_rc_to_mode);
 
 //遥控器数值获取加死区限制
-void chassis_rc_to_control_vector(chassis_move_t *chassis_move_rc_to_vector);
+void Chassis_rc_to_control_vector(chassis_move_t *chassis_move_rc_to_vector);
 
 //pid计算
 void Pid_caculate(chassis_move_t *chassis_move_control_loop);
@@ -43,14 +40,20 @@ float Angle_Limit (float angle ,float max);
 //将电机转子转向内侧时 修正方向
 fp32 Find_min_Angle(int16_t angle1,fp32 angle2);
 
+//更新电机数据
+static void Chassis_feedback_update(chassis_move_t *chassis_move_update);
 
+
+chassis_move_t chassis_move;//底盘运动数据
+float yaw_diff=0;
+extern int16_t final_yaw;
 
 
 
 void chassis_task(void *pvParameters)
 {
 	//初始化
-	Chassis_control_chassis_init(&chassis_move);
+	Chassis_init(&chassis_move);
 
 	while(1) 
 	{
@@ -59,6 +62,9 @@ void chassis_task(void *pvParameters)
 		
 		//底盘控制
 		Chassis_control_loop(&chassis_move);			
+		
+		//底盘数据更新
+		Chassis_feedback_update(&chassis_move);
 
 		//模式判断在前，失能底盘在后
 		if(toe_is_error(DBUS_TOE))
@@ -121,7 +127,7 @@ void Chassis_mode_change(chassis_move_t *chassis_move_rc_to_mode)
   * @retval 
 	* @attention	
 	*/
-static void Chassis_control_chassis_init(chassis_move_t* chassis_move_init)
+static void Chassis_init(chassis_move_t* chassis_move_init)
 {
 	uint8_t i=0;
 	
@@ -136,8 +142,9 @@ static void Chassis_control_chassis_init(chassis_move_t* chassis_move_init)
 	chassis_move_init->drct=1;
 	chassis_move_init->angle_ready=0;
 	chassis_move_init->yaw_init = imu.yaw;
+	chassis_move.chassis_RC=get_remote_control_point();
 	
-	/**初始化3508速度PID 并获取电机数据**/
+	//初始化3508速度PID 并获取电机数据
 	for(i=0;i<4;i++)
 	{
 		chassis_move_init->motor_chassis[i].chassis_motor_measure = get_Chassis_Motor_Measure_Point(i);//获取底盘3508的数据，接收电机的反馈结构体		
@@ -153,10 +160,13 @@ static void Chassis_control_chassis_init(chassis_move_t* chassis_move_init)
 		PID_init(&chassis_move_init->chassis_6020_angle_pid[i],PID_POSITION,PID_ANGLE_6020,M6020_MOTOR_ANGLE_PID_MAX_OUT,M6020_MOTOR_ANGLE_PID_MAX_IOUT);//初始化角度PID
 		chassis_move_init->AGV_wheel_Angle[i]=0.0f;
 	}
-	    //用一阶滤波代替斜波函数生成
-    first_order_filter_init(&chassis_move_init->chassis_cmd_slow_set_vx, CHASSIS_CONTROL_TIME, chassis_x_order_filter);
-    first_order_filter_init(&chassis_move_init->chassis_cmd_slow_set_vy, CHASSIS_CONTROL_TIME, chassis_y_order_filter);
-    first_order_filter_init(&chassis_move_init->chassis_cmd_slow_set_vz, CHASSIS_CONTROL_TIME_Z, chassis_z_order_filter);
+	//用一阶滤波
+  first_order_filter_init(&chassis_move_init->chassis_cmd_slow_set_vx, CHASSIS_CONTROL_TIME, chassis_x_order_filter);
+  first_order_filter_init(&chassis_move_init->chassis_cmd_slow_set_vy, CHASSIS_CONTROL_TIME, chassis_y_order_filter);
+  first_order_filter_init(&chassis_move_init->chassis_cmd_slow_set_vz, CHASSIS_CONTROL_TIME_Z, chassis_z_order_filter);
+	
+	//更新底盘数据
+	Chassis_feedback_update(chassis_move_init);
 }
 
 /**
@@ -168,13 +178,13 @@ static void Chassis_control_chassis_init(chassis_move_t* chassis_move_init)
 static void Chassis_control_loop(chassis_move_t *chassis_move_control_loop)
 {
 	//遥控器数值获取加死区限制和平均滤波
-	chassis_rc_to_control_vector(chassis_move_control_loop);
+	Chassis_rc_to_control_vector(chassis_move_control_loop);
 	
 	//底盘速度获取
 	Chassis_AGV_wheel_speed(chassis_move_control_loop);
 	
 	//转换为机器人坐标系
-	Robot_coordinate(&chassis_move_control_loop->absolute_chassis_speed,final_yaw);
+	Robot_coordinate(&chassis_move_control_loop->absolute_chassis_speed,yaw_diff);
 	
 	//pid计算
 	Pid_caculate(chassis_move_control_loop);
@@ -193,25 +203,29 @@ static void Chassis_AGV_wheel_speed(chassis_move_t *chassis_move_control_loop)
 {
 	switch(chassis_move_control_loop->my_remote_mode)
 	{			
+		//右中
 		case CHASSIS_RC_TOP_MOVE:
-		PID_CLEAR_ALL(chassis_move_control_loop);
-		chassis_move_control_loop->absolute_chassis_speed.Vw = chassis_move_control_loop->vz_set_channel;
-		chassis_move_control_loop->absolute_chassis_speed.Vx = chassis_move_control_loop->vx_set_channel;
-		chassis_move_control_loop->absolute_chassis_speed.Vy = chassis_move_control_loop->vy_set_channel;
-		yaw_diff = imu.yaw - chassis_move_control_loop->yaw_init;
+					PID_CLEAR_ALL(chassis_move_control_loop);
+					chassis_move_control_loop->absolute_chassis_speed.Vw = chassis_move_control_loop->vz_set_channel;
+					chassis_move_control_loop->absolute_chassis_speed.Vx = chassis_move_control_loop->vx_set_channel;
+					chassis_move_control_loop->absolute_chassis_speed.Vy = chassis_move_control_loop->vy_set_channel;
+					yaw_diff = final_yaw;
 		break;
+		
+		
+		//右下 
 		case CHASSIS_ZERO_FORCE:
-		PID_CLEAR_ALL(chassis_move_control_loop);
-		chassis_move_control_loop->absolute_chassis_speed.Vw = 0;
-		chassis_move_control_loop->absolute_chassis_speed.Vx = 0;
-		chassis_move_control_loop->absolute_chassis_speed.Vy = 0;
+					PID_CLEAR_ALL(chassis_move_control_loop);
+					chassis_move_control_loop->absolute_chassis_speed.Vw = 0;
+					chassis_move_control_loop->absolute_chassis_speed.Vx = 0;
+					chassis_move_control_loop->absolute_chassis_speed.Vy = 0;
 		break;
 	}
 }
 
 /**
   * @brief  计算底盘驱动电机3508的目标速度
-  * @param  chassis_speed 世界坐标的速度 
+	* @param  chassis_speed 转化为机器人坐标后的速度
   * @retval 
   * @attention	wheel_speed 3508目标速度
   */
@@ -226,7 +240,7 @@ void AGV_Speed_calc(chassis_speed_t *chassis_speed)
 
 /**
   * @brief  计算底盘驱动电机6020的目标角度
-  * @param  chassis_speed 世界坐标的速度 
+	* @param  chassis_speed 转化为机器人坐标后的速度
   * @retval 
   * @attention  AGV_wheel_Angle 6020目标角度
   */
@@ -236,7 +250,9 @@ void AGV_Angle_calc(chassis_speed_t *chassis_speed)
 	static fp32 AGV_wheel_Angle_last[4];
 	switch(chassis_move.my_remote_mode)
 	{
+		//右中
 		case CHASSIS_RC_TOP_MOVE:
+
 					atan_angle[0]=atan2(chassis_speed->Vy - chassis_speed->Vw*0.707f,chassis_speed->Vx + chassis_speed->Vw*0.707f)/PI*180.0;
 					atan_angle[1]=atan2(chassis_speed->Vy - chassis_speed->Vw*0.707f,chassis_speed->Vx - chassis_speed->Vw*0.707f)/PI*180.0;
 					atan_angle[2]=atan2(chassis_speed->Vy + chassis_speed->Vw*0.707f,chassis_speed->Vx - chassis_speed->Vw*0.707f)/PI*180.0;
@@ -269,6 +285,12 @@ void AGV_Angle_calc(chassis_speed_t *chassis_speed)
 						}
 					}	
 				break;
+					
+		//右下
+		case CHASSIS_ZERO_FORCE:
+					
+					for(uint8_t i=0;i<4;i++)
+					chassis_move.AGV_wheel_Angle[i]=AGV_wheel_Angle_last[i];
 
 	}
 }
@@ -281,17 +303,17 @@ void AGV_Angle_calc(chassis_speed_t *chassis_speed)
   * @attention	对输出数值进行了一阶低通滤波
   */
 //遥控器数值获取加死区限制
-void chassis_rc_to_control_vector(chassis_move_t *chassis_move_rc_to_vector)
+void Chassis_rc_to_control_vector(chassis_move_t *chassis_move_rc_to_vector)
 {
-    //死区限制，因为遥控器可能存在差异 摇杆在中间，其值不为0
-    rc_deadband_limit(chassis_move_rc_to_vector->chassis_RC->rc.ch[3], chassis_move_rc_to_vector->vx_channel, CHASSIS_RC_DEADLINE);
-    rc_deadband_limit(chassis_move_rc_to_vector->chassis_RC->rc.ch[2], chassis_move_rc_to_vector->vy_channel, CHASSIS_RC_DEADLINE);
-    rc_deadband_limit(chassis_move_rc_to_vector->chassis_RC->rc.ch[0], chassis_move_rc_to_vector->vz_channel, CHASSIS_RC_DEADLINE);
+  //死区限制，因为遥控器可能存在差异 摇杆在中间，其值不为0
+  rc_deadband_limit(chassis_move_rc_to_vector->chassis_RC->rc.ch[2], chassis_move_rc_to_vector->vx_channel, CHASSIS_RC_DEADLINE);
+  rc_deadband_limit(chassis_move_rc_to_vector->chassis_RC->rc.ch[3], chassis_move_rc_to_vector->vy_channel, CHASSIS_RC_DEADLINE);
+  rc_deadband_limit(chassis_move_rc_to_vector->chassis_RC->rc.ch[0], chassis_move_rc_to_vector->vz_channel, CHASSIS_RC_DEADLINE);
 		
 	//8911/660=13.5015 将速度扩大到额定转速
-	chassis_move_rc_to_vector->vx_set_channel = -chassis_move_rc_to_vector->vx_channel*13.5015;
+	chassis_move_rc_to_vector->vx_set_channel = chassis_move_rc_to_vector->vx_channel*13.5015;
 	chassis_move_rc_to_vector->vy_set_channel = -chassis_move_rc_to_vector->vy_channel*13.5015;
-	chassis_move_rc_to_vector->vz_set_channel =  chassis_move_rc_to_vector->vz_channel*13.5015;
+	chassis_move_rc_to_vector->vz_set_channel = chassis_move_rc_to_vector->vz_channel*13.5015;
 	
 	//一阶低通滤波代替斜波作为底盘速度输入
   first_order_filter_cali(&chassis_move_rc_to_vector->chassis_cmd_slow_set_vx, chassis_move_rc_to_vector->vx_set_channel);
@@ -321,8 +343,18 @@ void Robot_coordinate(chassis_speed_t * wrold_speed, fp32 angle)
     fp32 angle_diff=angle* PI / 180;
     chassis_speed_t temp_speed;
     temp_speed.Vw = wrold_speed->Vw; 
-    temp_speed.Vx = wrold_speed->Vx * cos(angle_diff) - wrold_speed->Vy * sin(angle_diff);
-    temp_speed.Vy = wrold_speed->Vx * sin(angle_diff) + wrold_speed->Vy * cos(angle_diff);
+
+		if(temp_speed.Vw>=0)
+		{
+			temp_speed.Vx = wrold_speed->Vx * cos(angle_diff) + wrold_speed->Vy * sin(angle_diff);
+			temp_speed.Vy = -wrold_speed->Vx * sin(angle_diff) + wrold_speed->Vy * cos(angle_diff);
+
+		}
+		else
+			{
+		 temp_speed.Vx = wrold_speed->Vx * cos(angle_diff) - wrold_speed->Vy * sin(angle_diff);
+	   temp_speed.Vy = wrold_speed->Vx * sin(angle_diff) + wrold_speed->Vy * cos(angle_diff);
+		}
 	
 		AGV_Angle_calc(&temp_speed);//6020
     AGV_Speed_calc(&temp_speed);//3508
@@ -424,7 +456,21 @@ static void PID_CLEAR_ALL(chassis_move_t *chassis_move_data)
 	}
 }
 
-
-
+/**
+  * @brief          底盘测量数据更新，包括电机速度，欧拉角度，机器人速度
+  * @param[out]     chassis_move_update:"chassis_move"变量指针.
+  * @retval         none
+  */
+static void Chassis_feedback_update(chassis_move_t *chassis_move_update)
+{
+	uint8_t i = 0;
+	
+	//更新3508电机实际速度
+	for (i = 0; i < 4; i++)
+	{
+		chassis_move_update->motor_chassis[i].speed = chassis_move_update->motor_chassis[i].chassis_motor_measure->rpm * CHASSIS_MOTOR_RPM_TO_VECTOR_SEN;
+//		chassis_move_update->motor_chassis[i].accel = chassis_move_update->motor_chassis[i].chassis_motor_measure->rpm * CHASSIS_MOTOR_RPM_TO_VECTOR_SEN;
+	}
+}
 
 

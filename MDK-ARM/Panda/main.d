@@ -61,7 +61,7 @@ panda\main.o: ./user/ops.h
 panda\main.o: ../Application/base_usart.h
 panda\main.o: ../Application/chassis_task.h
 panda\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
-panda\main.o: ../Application/remote_task.h
+panda\main.o: ../Application/remote_control.h
 panda\main.o: ./user/bsp_rc.h
 panda\main.o: C:\Keil5 MDK\ARM\ARMCC\Bin\..\include\math.h
 panda\main.o: ../Application/filter.h

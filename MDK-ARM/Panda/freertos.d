@@ -52,5 +52,5 @@ panda\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_group
 panda\freertos.o: ../Application/detect_task.h
 panda\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 panda\freertos.o: ../Core/Inc/usart.h
-panda\freertos.o: ../Application/remote_task.h
+panda\freertos.o: ../Application/remote_control.h
 panda\freertos.o: ./user/bsp_rc.h

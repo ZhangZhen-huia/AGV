@@ -2,12 +2,12 @@
 #include "gpio.h"
 #include "freertos.h"
 #include "bsp_imu.h"
-
+#include "imu_task.h"
 extern imu_t              imu;
 char buf[300];
 int count;
 
-void imu_task(void const * argument)
+void imu_task(void *pvParameters)
 {
 	while(1)
 	{

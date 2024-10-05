@@ -5,7 +5,7 @@
 #include "Can_recive.h"
 #include "cmsis_os.h"
 #include "usart.h"
-#include "remote_task.h"
+#include "remote_control.h"
 #include "math.h"
 #include "filter.h"
 #include "bsp_imu.h"
@@ -22,7 +22,8 @@ typedef enum
 {
 	CHASSIS_ZERO_FORCE = 0, //无力模式
 	CHASSIS_RC_TOP_MOVE = 1, //遥控器 小陀螺模式
-	CHASSIS_PC_CONTROL = 2, //PC 键鼠模式
+	CHASSIS_RC_Normal = 2, //遥控器 小陀螺模式
+	CHASSIS_PC_CONTROL = 3, //PC 键鼠模式
 		
 }REMOTE_MODE; //遥控器模式
 
@@ -54,11 +55,10 @@ typedef struct
 
 typedef struct
 {
-	 uwb_info_t uwb_data;
 	const RC_ctrl_t *chassis_RC;               					//底盘使用的遥控器指针, the point to remote control
   chassis_motor_t motor_chassis[8];          					//chassis motor data.底盘电机数据
 
-  pid_type_def chassis_3508_angle_pid[4];             //motor speed PID.底盘电机速度pid
+  //pid_type_def chassis_3508_angle_pid[4];             //motor speed PID.底盘电机速度pid
   pid_type_def chassis_3508_speed_pid[4];             //motor speed PID.底盘电机速度pid
   pid_type_def chassis_6020_angle_pid[4];             //底盘6020角度pid
   pid_type_def chassis_6020_speed_pid[4];							//底盘6020速度pid
@@ -67,22 +67,20 @@ typedef struct
   first_order_filter_type_t chassis_cmd_slow_set_vx;  //use first order filter to slow set-point.使用一阶低通滤波减缓设定值
   first_order_filter_type_t chassis_cmd_slow_set_vy;  //use first order filter to slow set-point.使用一阶低通滤波减缓设定值
   first_order_filter_type_t chassis_cmd_slow_set_vz;  //use first order filter to slow set-point.使用一阶低通滤波减缓设定值
-	
-  ramp_function_source_t chassis_ramp;  			 				//斜波
+  ramp_function_source_t chassis_ramp;  			 				//斜波,未用到
 	
   REMOTE_MODE 	my_remote_mode;													//遥控器模式状态机 
 	
 	
   chassis_speed_t absolute_chassis_speed;               //底盘设定绝对速度，世界坐标系
 	
-  int8_t drct;																				//决定驱动电机正反转
-	float yaw_init;
+  int8_t drct;																					//用于优劣弧，决定驱动电机正反转
+	uint8_t angle_ready;        												//3508等待6020转动到指定角度标志位
+	float yaw_init;																				//初始化YAW轴
 	
-  uint8_t angle_ready;        												//3508等待6020转动到指定角度标志位
   
   fp32 AGV_wheel_Angle[4];       											 //6020最终计算出的角度
-  fp32 wheel_speed[4]; 																//3508最终计算出的速度
-	
+  fp32 wheel_speed[4]; 																//3508最终计算出的速度	
   fp32 vx_set_channel, vy_set_channel,vz_set_channel,wz_set_channel;    //设定转速范围： +-8911
   int32_t vx_channel,vy_channel,vz_channel,wz_channel;         		 //接收遥控器数据
 	
@@ -112,6 +110,11 @@ extern chassis_move_t chassis_move;//底盘运动数据
 //电机码盘值最大以及中值
 #define HALF_ECD_RANGE  4096
 #define ECD_RANGE       8191
+
+//m3508转化成底盘速度(m/s)的比例
+#define M3508_MOTOR_RPM_TO_VECTOR 0.00392699075	//2*PI*R/60
+#define CHASSIS_MOTOR_RPM_TO_VECTOR_SEN M3508_MOTOR_RPM_TO_VECTOR
+
 
 //小陀螺半径 m 
 #define MOTOR_DISTANCE_TO_CENTER 0.235619445f

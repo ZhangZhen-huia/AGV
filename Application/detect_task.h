@@ -4,7 +4,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "usart.h"
-#include "remote_task.h"
+#include "remote_control.h"
 
 
 
@@ -13,10 +13,14 @@
 enum errorList
 {
     DBUS_TOE = 0,
-//    CHASSIS_MOTOR1_TOE,
-//    CHASSIS_MOTOR2_TOE,
-//    CHASSIS_MOTOR3_TOE,
-//    CHASSIS_MOTOR4_TOE,
+//    CHASSIS_3508_MOTOR1_TOE,
+//    CHASSIS_3508_MOTOR2_TOE,
+//    CHASSIS_3508_MOTOR3_TOE,
+//    CHASSIS_3508_MOTOR4_TOE,
+//	  CHASSIS_6020_MOTOR1_TOE,
+//    CHASSIS_6020_MOTOR2_TOE,
+//    CHASSIS_6020_MOTOR3_TOE,
+//    CHASSIS_6020_MOTOR4_TOE,
 //    YAW_GIMBAL_MOTOR_TOE,
 //    PITCH_GIMBAL_MOTOR_TOE,
 //    TRIGGER_MOTOR_TOE,

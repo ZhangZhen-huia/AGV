@@ -53,7 +53,7 @@ panda\chassis_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 panda\chassis_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 panda\chassis_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 panda\chassis_task.o: ../Core/Inc/usart.h
-panda\chassis_task.o: ..\Application\remote_task.h
+panda\chassis_task.o: ..\Application\remote_control.h
 panda\chassis_task.o: ./user/bsp_rc.h
 panda\chassis_task.o: C:\Keil5 MDK\ARM\ARMCC\Bin\..\include\math.h
 panda\chassis_task.o: ..\Application\filter.h

@@ -39,13 +39,13 @@
 
 
 /**
-	*	´´½¨ÈÎÎñºê¶¨Òå
-	* ## ÊÇÔ¤´¦ÀíÆ÷µÄ±ê¼ÇÕ³ÌùÔËËã·û£¬¼´Á¬½ÓÇ°ºóÁ½¸öµ¥¸ö×Ö·û
-	* ÔÚCÓïÑÔµÄºê¶¨ÒåÖĞ£¬#l ÊÇ×Ö·û´®»¯ÔËËã·û£¨stringizing operator£©µÄÒ»²¿·Ö¡£
-	* ×Ö·û´®»¯ÔËËã·û # ÓÃÓÚ½«ºê²ÎÊı×ª»»ÎªÒ»¸ö×Ö·û´®³£Á¿¡£
-	* µ±ÄãÔÚºê¶¨ÒåÖĞÊ¹ÓÃ #l Ê±£¬ÕâÀïµÄ l ÊÇÒ»¸öºê²ÎÊı£¬¶ø # ÔËËã·û»á½« l ×ª»»ÎªÒ»¸ö×Ö·û´®¡£
-	* ÕâÒâÎ¶×ÅÔÚºêÕ¹¿ªÊ±£¬l »á±»ËüÊµ¼ÊµÄÖµËùÌæ»»£¬²¢ÇÒÀ¨ºÅÖĞµÄ l »á±»Ë«ÒıºÅ°üÎ§£¬³ÉÎªÒ»¸ö×Ö·û´®¡£
-	* ÈÎÎñº¯ÊıÖ¸Õë£¬Ãû×Ö£¬¶ÑÕ»£¬ÈÎÎñ²ÎÊı£¬ÓÅÏÈ¼¶£¬¾ä±ú¿ØÖÆ¿é
+	*	åˆ›å»ºä»»åŠ¡å®å®šä¹‰
+	* ## æ˜¯é¢„å¤„ç†å™¨çš„æ ‡è®°ç²˜è´´è¿ç®—ç¬¦ï¼Œå³è¿æ¥å‰åä¸¤ä¸ªå•ä¸ªå­—ç¬¦
+	* åœ¨Cè¯­è¨€çš„å®å®šä¹‰ä¸­ï¼Œ#l æ˜¯å­—ç¬¦ä¸²åŒ–è¿ç®—ç¬¦ï¼ˆstringizing operatorï¼‰çš„ä¸€éƒ¨åˆ†ã€‚
+	* å­—ç¬¦ä¸²åŒ–è¿ç®—ç¬¦ # ç”¨äºå°†å®å‚æ•°è½¬æ¢ä¸ºä¸€ä¸ªå­—ç¬¦ä¸²å¸¸é‡ã€‚
+	* å½“ä½ åœ¨å®å®šä¹‰ä¸­ä½¿ç”¨ #l æ—¶ï¼Œè¿™é‡Œçš„ l æ˜¯ä¸€ä¸ªå®å‚æ•°ï¼Œè€Œ # è¿ç®—ç¬¦ä¼šå°† l è½¬æ¢ä¸ºä¸€ä¸ªå­—ç¬¦ä¸²ã€‚
+	* è¿™æ„å‘³ç€åœ¨å®å±•å¼€æ—¶ï¼Œl ä¼šè¢«å®ƒå®é™…çš„å€¼æ‰€æ›¿æ¢ï¼Œå¹¶ä¸”æ‹¬å·ä¸­çš„ l ä¼šè¢«åŒå¼•å·åŒ…å›´ï¼Œæˆä¸ºä¸€ä¸ªå­—ç¬¦ä¸²ã€‚
+	* ä»»åŠ¡å‡½æ•°æŒ‡é’ˆï¼Œåå­—ï¼Œå †æ ˆï¼Œä»»åŠ¡å‚æ•°ï¼Œä¼˜å…ˆçº§ï¼Œå¥æŸ„æ§åˆ¶å—
 	*/
 #define mTaskCreate(c,l)    xTaskCreate((TaskFunction_t )l##_task,		\
 										(const char*    )#l,															\
@@ -55,45 +55,43 @@
 										(TaskHandle_t*  )&l##_TASKHandle)
 
 										
-										
-										
-										
 
-/*Ò£¿ØÆ÷¼ì²âÈÎÎñ*/
-/*-ÕªÒª-*/ #define DETECT
-/*-ÓÅÏÈ-*/ #define DETECT_TASK_PRIO 5
-/*-¶ÑÕ»-*/ #define DETECT_STK_SIZE 100
-/*-ÉùÃ÷-*/extern void detect_task(void *pvParameters);
-/*-¾ä±ú-*/TaskHandle_t    detect_TASKHandle;
+/*é¥æ§å™¨æ£€æµ‹ä»»åŠ¡*/
+/*-æ‘˜è¦-*/ #define DETECT
+/*-ä¼˜å…ˆ-*/ #define DETECT_TASK_PRIO 5
+/*-å †æ ˆ-*/ #define DETECT_STK_SIZE 100
+/*-å£°æ˜-*/extern void detect_task(void *pvParameters);
+/*-å¥æŸ„-*/TaskHandle_t    detect_TASKHandle;
 
 
-/*µ×ÅÌÈÎÎñ*/
-/*-ÕªÒª-*/ #define CHASSIS
-/*-ÓÅÏÈ-*/ #define CHASSIS_TASK_PRIO 5
-/*-¶ÑÕ»-*/ #define CHASSIS_STK_SIZE 256
-/*-ÉùÃ÷-*/extern void chassis_task(void *pvParameters);
-/*-¾ä±ú-*/TaskHandle_t    chassis_TASKHandle;
+/*åº•ç›˜ä»»åŠ¡*/
+/*-æ‘˜è¦-*/ #define CHASSIS
+/*-ä¼˜å…ˆ-*/ #define CHASSIS_TASK_PRIO 5
+/*-å †æ ˆ-*/ #define CHASSIS_STK_SIZE 256
+/*-å£°æ˜-*/extern void chassis_task(void *pvParameters);
+/*-å¥æŸ„-*/TaskHandle_t    chassis_TASKHandle;
 
-/*imuÈÎÎñ*/
-/*-ÕªÒª-*/ #define IMU
-/*-ÓÅÏÈ-*/ #define IMU_TASK_PRIO 0
-/*-¶ÑÕ»-*/ #define IMU_STK_SIZE 100
-/*-ÉùÃ÷-*/extern void imu_task(void *pvParameters);
-/*-¾ä±ú-*/TaskHandle_t    imu_TASKHandle;
+/*imuä»»åŠ¡*/
+/*-æ‘˜è¦-*/ #define IMU
+/*-ä¼˜å…ˆ-*/ #define IMU_TASK_PRIO 0
+/*-å †æ ˆ-*/ #define IMU_STK_SIZE 100
+/*-å£°æ˜-*/extern void imu_task(void *pvParameters);
+/*-å¥æŸ„-*/TaskHandle_t    imu_TASKHandle;
 
-/*Ò£¿ØÆ÷ÈÎÎñ*/
-/*-ÕªÒª-*/ #define REMOTE
-/*-ÓÅÏÈ-*/ #define REMOTE_TASK_PRIO 5
-/*-¶ÑÕ»-*/ #define REMOTE_STK_SIZE 100
-/*-ÉùÃ÷-*/extern void remote_task(void *pvParameters);
-/*-¾ä±ú-*/TaskHandle_t    remote_TASKHandle;
+/*LEDä»»åŠ¡*/
+/*-æ‘˜è¦-*/ #define LED
+/*-ä¼˜å…ˆ-*/ #define LED_TASK_PRIO 3
+/*-å †æ ˆ-*/ #define LED_STK_SIZE 100
+/*-å£°æ˜-*/extern void led_task(void *pvParameters);
+/*-å¥æŸ„-*/TaskHandle_t    led_TASKHandle;
 
-/*LEDÈÎÎñ*/
-/*-ÕªÒª-*/ #define LED
-/*-ÓÅÏÈ-*/ #define LED_TASK_PRIO 3
-/*-¶ÑÕ»-*/ #define LED_STK_SIZE 100
-/*-ÉùÃ÷-*/extern void led_task(void *pvParameters);
-/*-¾ä±ú-*/TaskHandle_t    led_TASKHandle;
+///*ERRä»»åŠ¡*/
+///*-æ‘˜è¦-*/ #define ERR
+///*-ä¼˜å…ˆ-*/ #define LED_TASK_PRIO 3
+///*-å †æ ˆ-*/ #define LED_STK_SIZE 100
+///*-å£°æ˜-*/extern void led_task(void *pvParameters);
+///*-å¥æŸ„-*/TaskHandle_t    led_TASKHandle;
+
 
 
 /* USER CODE END PD */
@@ -190,7 +188,6 @@ void start_task(void const * argument)
 		mTaskCreate(DETECT,detect);
 		mTaskCreate(CHASSIS,chassis);
 		mTaskCreate(IMU,imu);
-		mTaskCreate(REMOTE,remote);
 		mTaskCreate(LED,led);
 
 		

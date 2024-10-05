@@ -53,7 +53,7 @@ panda\filter.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 panda\filter.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 panda\filter.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 panda\filter.o: ../Core/Inc/usart.h
-panda\filter.o: ..\Application\remote_task.h
+panda\filter.o: ..\Application\remote_control.h
 panda\filter.o: ./user/bsp_rc.h
 panda\filter.o: C:\Keil5 MDK\ARM\ARMCC\Bin\..\include\math.h
 panda\filter.o: ..\Application\filter.h

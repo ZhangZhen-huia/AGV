@@ -852,11 +852,6 @@
           <GroupName>Application_Task</GroupName>
           <Files>
             <File>
-              <FileName>remote_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\remote_task.c</FilePath>
-            </File>
-            <File>
               <FileName>detect_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\detect_task.c</FilePath>
@@ -877,24 +872,19 @@
               <FilePath>..\Application\filter.c</FilePath>
             </File>
             <File>
-              <FileName>base_usart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Application\base_usart.h</FilePath>
-            </File>
-            <File>
               <FileName>imu_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\imu_task.c</FilePath>
             </File>
             <File>
-              <FileName>imu_task.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Application\imu_task.h</FilePath>
+              <FileName>remote_control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\remote_control.c</FilePath>
             </File>
             <File>
-              <FileName>base_usart.c</FileName>
+              <FileName>chassis_behaviour.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Application\base_usart.c</FilePath>
+              <FilePath>..\Application\chassis_behaviour.c</FilePath>
             </File>
           </Files>
         </Group>

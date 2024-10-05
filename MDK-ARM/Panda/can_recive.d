@@ -53,7 +53,7 @@ panda\can_recive.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
 panda\can_recive.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 panda\can_recive.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 panda\can_recive.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
-panda\can_recive.o: ../Application/remote_task.h
+panda\can_recive.o: ../Application/remote_control.h
 panda\can_recive.o: ./user/bsp_rc.h
 panda\can_recive.o: C:\Keil5 MDK\ARM\ARMCC\Bin\..\include\math.h
 panda\can_recive.o: ../Application/filter.h

@@ -338,7 +338,6 @@ void UART7_IRQHandler(void)
   /* USER CODE END UART7_IRQn 0 */
   HAL_UART_IRQHandler(&huart7);
   /* USER CODE BEGIN UART7_IRQn 1 */
-	my_UART_IDLE_function();
 
   /* USER CODE END UART7_IRQn 1 */
 }

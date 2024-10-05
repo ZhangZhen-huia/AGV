@@ -1,7 +1,6 @@
-#include "remote_task.h"
+#include "remote_control.h"
 #include "cmsis_os.h"
 #include "main.h"
-#include "chassis_task.h"
 #include "detect_task.h"
 
 /*'''
@@ -31,6 +30,7 @@
 '''*/
 extern UART_HandleTypeDef huart1;
 extern DMA_HandleTypeDef hdma_usart1_rx;
+
 //遥控器出错数据上限
 #define RC_CHANNAL_ERROR_VALUE 700
 /**
@@ -55,11 +55,8 @@ RC_ctrl_t rc_ctrl;
 //接收原始数据，为18个字节，给了36个字节长度，防止DMA传输越界
 uint8_t sbus_rx_buf[2][SBUS_RX_BUF_NUM];
 
-/**
-  * @brief          remote control init
-  * @param[in]      none
-  * @retval         none
-  */
+
+
 /**
   * @brief          遥控器初始化
   * @param[in]      none
@@ -69,11 +66,8 @@ void remote_control_init(void)
 {
     RC_init(sbus_rx_buf[0], sbus_rx_buf[1], SBUS_RX_BUF_NUM);
 }
-/**
-  * @brief          get remote control data point
-  * @param[in]      none
-  * @retval         remote control data point
-  */
+
+
 /**
   * @brief          获取遥控器数据指针
   * @param[in]      none
@@ -84,16 +78,7 @@ const RC_ctrl_t *get_remote_control_point(void)
     return &rc_ctrl;
 }
 
-void remote_task(void *pvParameters)
-{
-	remote_control_init();
-	while(1)
-	{
-		chassis_move.chassis_RC=get_remote_control_point();
 
-	}
-	
-}
 
 //串口中断
 void USART1_IRQHandler(void)
@@ -172,12 +157,7 @@ void USART1_IRQHandler(void)
 }
 
 
-/**
-  * @brief          remote control protocol resolution
-  * @param[in]      sbus_buf: raw data point
-  * @param[out]     rc_ctrl: remote control data struct point
-  * @retval         none
-  */
+
 /**
   * @brief          遥控器协议解析
   * @param[in]      sbus_buf: 原生数据指针
@@ -196,8 +176,11 @@ static void sbus_to_rc(volatile const uint8_t *sbus_buf, RC_ctrl_t *rc_ctrl)
     rc_ctrl->rc.ch[2] = ((sbus_buf[2] >> 6) | (sbus_buf[3] << 2) |          //!< Channel 2
                          (sbus_buf[4] << 10)) &0x07ff;
     rc_ctrl->rc.ch[3] = ((sbus_buf[4] >> 1) | (sbus_buf[5] << 7)) & 0x07ff; //!< Channel 3
+		
     rc_ctrl->rc.s[0] = ((sbus_buf[5] >> 4) & 0x0003);                  //!< Switch left
     rc_ctrl->rc.s[1] = ((sbus_buf[5] >> 4) & 0x000C) >> 2;                       //!< Switch right
+		
+		
     rc_ctrl->mouse.x = sbus_buf[6] | (sbus_buf[7] << 8);                    //!< Mouse X axis
     rc_ctrl->mouse.y = sbus_buf[8] | (sbus_buf[9] << 8);                    //!< Mouse Y axis
     rc_ctrl->mouse.z = sbus_buf[10] | (sbus_buf[11] << 8);                  //!< Mouse Z axis

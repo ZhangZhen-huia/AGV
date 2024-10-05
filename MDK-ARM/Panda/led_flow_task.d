@@ -57,7 +57,7 @@ panda\led_flow_task.o: ./user/Can_recive.h
 panda\led_flow_task.o: ../Core/Inc/can.h
 panda\led_flow_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 panda\led_flow_task.o: ../Core/Inc/usart.h
-panda\led_flow_task.o: ..\Application\remote_task.h
+panda\led_flow_task.o: ..\Application\remote_control.h
 panda\led_flow_task.o: ./user/bsp_rc.h
 panda\led_flow_task.o: C:\Keil5 MDK\ARM\ARMCC\Bin\..\include\math.h
 panda\led_flow_task.o: ..\Application\filter.h

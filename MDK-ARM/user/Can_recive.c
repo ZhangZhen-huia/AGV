@@ -228,11 +228,6 @@ const Revice_Motro *get_Lift_Motor_Point(void)
 	return &Revice_LiftDATA[0];
 }
 
-void uwb_data_init(void)
-{
-	chassis_move.uwb_data.y = chassis_move.uwb_data.y-165-238;
-	chassis_move.uwb_data.x = chassis_move.uwb_data.x-364;
-}
 
 extern int num;
 
@@ -316,9 +311,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 		if(HAL_UART_Receive_IT(&huart8,uwb_receive_data,8)==HAL_OK)
 		{
-			a=-a;
-			chassis_move.uwb_data.x = uwb_receive_data[1]*256+uwb_receive_data[2];
-			chassis_move.uwb_data.y	= uwb_receive_data[3]*256+uwb_receive_data[4];
 			if(!first_flag)
 			{
 				first_C_yaw=(uwb_receive_data[5]*256+uwb_receive_data[6]);
@@ -326,14 +318,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			}
 			C_yaw = (uwb_receive_data[5]*256+uwb_receive_data[6]);//yaw_caculate(uwb_receive_data[4]*256+uwb_receive_data[5]);
 			final_yaw = C_yaw_caculate();
-			uwb_data_init();
 		}
 }
 
-//void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-//{
-//	if(HAL_UART_Transmit_IT(&huart7,&chassis_move.Paw_flag,1)==HAL_OK)
-//		{
-//			
-//		}
-//}

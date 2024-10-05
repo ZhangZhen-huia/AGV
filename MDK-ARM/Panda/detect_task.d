@@ -51,5 +51,5 @@ panda\detect_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 panda\detect_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 panda\detect_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 panda\detect_task.o: ../Core/Inc/usart.h
-panda\detect_task.o: ..\Application\remote_task.h
+panda\detect_task.o: ..\Application\remote_control.h
 panda\detect_task.o: ./user/bsp_rc.h

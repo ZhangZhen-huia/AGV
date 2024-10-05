@@ -100,8 +100,8 @@ int main(void)
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
 	HAL_UART_Receive_IT(&huart8,uwb_receive_data,8);
+	remote_control_init();
 	canfilter_init_start();
-  UART_IDLE_init();
 	mpu_device_init();
 	init_quaternion();		
   /* USER CODE END 2 */

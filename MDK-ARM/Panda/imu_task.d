@@ -51,3 +51,4 @@ panda\imu_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 panda\imu_task.o: C:\Keil5 MDK\ARM\ARMCC\Bin\..\include\stdio.h
 panda\imu_task.o: ../Core/Inc/struct_typedef.h
 panda\imu_task.o: ./user/bsp_imu.h
+panda\imu_task.o: ..\Application\imu_task.h
