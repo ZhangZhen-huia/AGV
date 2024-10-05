@@ -152,16 +152,10 @@ extern chassis_move_t chassis_move;//底盘运动数据
 #define GIM_Y_ECD_3				1382.0f // 7515
 #define GIM_Y_ECD_4				390.0f	//1682
 
-//自动
-#define GIM_AUTO_ECD_1				4021.0f
-#define GIM_AUTO_ECD_2				1865.0f
-#define GIM_AUTO_ECD_3				5478.0f
-#define GIM_AUTO_ECD_4				4538.0f
 
 //摇杆死区
 #define CHASSIS_RC_DEADLINE 10
 
-#define ACCELERATION 20.0  // 设定一个加速度值，单位为从cm/s^2
 
 
 /**

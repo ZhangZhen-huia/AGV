@@ -1,54 +1,23 @@
 #include "chassis_task.h"
 #include "pid.h"
-
-extern int16_t final_yaw;
 #include "bsp_imu.h"
-/*'''
-
-　　┏┓　　　┏┓+ +
-　┏┛┻━━━┛┻┓ + +
-　┃　　　　　　　┃ 　
-　┃　　　━　　　┃ ++ + + +
- ████━████ ┃+
-　┃　　　　　　　┃ +
-　┃　　　┻　　　┃
-　┃　　　　　　　┃ + +
-　┗━┓　　　┏━┛
-　　　┃　　　┃　　　　　　　　　　　
-　　　┃　　　┃ + + + +
-　　　┃　　　┃
-　　　┃　　　┃ +  神兽保佑
-　　　┃　　　┃    代码无bug　　
-　　　┃　　　┃　　+　　　　　　　　　
-　　　┃　 　　┗━━━┓ + +
-　　　┃ 　　　　　　　┣┓
-　　　┃ 　　　　　　　┏┛
-　　　┗┓┓┏━┳┓┏┛ + + + +
-　　　　┃┫┫　┃┫┫
-　　　　┗┻┛　┗┻┛+ + + +
-'''*/
-
-/*---------------------------------------------------------------------------------------------------------*/
-/*																				|	控制模式	|																											 */
-/*					遥控器左边	上：遥控器模式											右边：上：原地小陀螺																 */
-/*										中：底盘无力模式													中：全向移动																	 */
-/*										下：自动模式															下：急停 or 无力															 */
-/*---------------------------------------------------------------------------------------------------------*/
 
 chassis_move_t chassis_move;//底盘运动数据
 float yaw_diff=0;
-/*--------------------------------------------------遥控器模式-----------------------------------------------*/
+extern int16_t final_yaw;
+
+
 // 遥控器模式所有初始化
-static void remote_control_chassis_init(chassis_move_t* chassis_move_init);
+static void Chassis_control_chassis_init(chassis_move_t* chassis_move_init);
 
 //遥控器控制模式，获取8个电机的速度并且进行PID计算
-static void Chassis_remote_control_loop(chassis_move_t *chassis_move_control_loop);
+static void Chassis_control_loop(chassis_move_t *chassis_move_control_loop);
 
 //机器人坐标
 void Robot_coordinate(chassis_speed_t * wrold_speed, fp32 angle);
 
 //确定底盘运动速度，世界坐标
-static void Remote_chassis_AGV_wheel_speed(chassis_move_t *chassis_move_control_loop);
+static void Chassis_AGV_wheel_speed(chassis_move_t *chassis_move_control_loop);
 
 //等待6020角度转到位在转3508
 void angle_judge(chassis_move_t *chassis_move_control_loop);
@@ -60,9 +29,8 @@ void Chassis_mode_change(chassis_move_t *chassis_move_rc_to_mode);
 void chassis_rc_to_control_vector(chassis_move_t *chassis_move_rc_to_vector);
 
 //pid计算
-void Remote_pid_caculate(chassis_move_t *chassis_move_control_loop);
+void Pid_caculate(chassis_move_t *chassis_move_control_loop);
 
-/*-------------------------------------------------------公共-----------------------------------------------------------*/
 //判断优弧劣弧-->只转3508，不转6020，把6020角度控制在0-90度内，可以更好的转换运动方向
 void Speed_Toggle(chassis_move_t *chassis_move_control_Speed);
 
@@ -78,18 +46,19 @@ fp32 Find_min_Angle(int16_t angle1,fp32 angle2);
 
 
 
-/*----------------------------------------------------------------------TASK---------------------------------------------------------------------*/
 
 void chassis_task(void *pvParameters)
 {
-	remote_control_chassis_init(&chassis_move);
+	//初始化
+	Chassis_control_chassis_init(&chassis_move);
 
 	while(1) 
 	{
 		//底盘控制模式选择
 		Chassis_mode_change(&chassis_move);
 		
-		Chassis_remote_control_loop(&chassis_move);			
+		//底盘控制
+		Chassis_control_loop(&chassis_move);			
 
 		//模式判断在前，失能底盘在后
 		if(toe_is_error(DBUS_TOE))
@@ -114,9 +83,12 @@ void chassis_task(void *pvParameters)
 /*-------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 
-
-/*****************************************************模式选择函数******************************************/
-//自动模式和遥控模式选择
+/**
+	* @brief 模式选择函数
+	* @param 底盘结构体
+  * @retval 
+	* @attention
+	*/
 void Chassis_mode_change(chassis_move_t *chassis_move_rc_to_mode)
 {
 	//左边
@@ -143,12 +115,13 @@ void Chassis_mode_change(chassis_move_t *chassis_move_rc_to_mode)
 	}
 }
 
-/*-----------------------------------------------------------------------------------------------------------------------*/
-/***************************************************遥控器模式相关函数*****************************************************/
-/*-----------------------------------------------------------------------------------------------------------------------*/
-
-//初始化
-static void remote_control_chassis_init(chassis_move_t* chassis_move_init)
+/**
+	* @brief 初始化函数
+	* @param 底盘结构体
+  * @retval 
+	* @attention	
+	*/
+static void Chassis_control_chassis_init(chassis_move_t* chassis_move_init)
 {
 	uint8_t i=0;
 	
@@ -163,6 +136,7 @@ static void remote_control_chassis_init(chassis_move_t* chassis_move_init)
 	chassis_move_init->drct=1;
 	chassis_move_init->angle_ready=0;
 	chassis_move_init->yaw_init = imu.yaw;
+	
 	/**初始化3508速度PID 并获取电机数据**/
 	for(i=0;i<4;i++)
 	{
@@ -185,24 +159,37 @@ static void remote_control_chassis_init(chassis_move_t* chassis_move_init)
     first_order_filter_init(&chassis_move_init->chassis_cmd_slow_set_vz, CHASSIS_CONTROL_TIME_Z, chassis_z_order_filter);
 }
 
-//遥控器模式下，取8个电机的速度并且进行PID计算
-static void Chassis_remote_control_loop(chassis_move_t *chassis_move_control_loop)
+/**
+	* @brief 底盘控制函数调用函数
+	* @param 底盘结构体
+  * @retval 
+	* @attention	
+	*/
+static void Chassis_control_loop(chassis_move_t *chassis_move_control_loop)
 {
 	//遥控器数值获取加死区限制和平均滤波
-	chassis_rc_to_control_vector(chassis_move_control_loop); //获取遥控器值
-	Remote_chassis_AGV_wheel_speed(chassis_move_control_loop);
+	chassis_rc_to_control_vector(chassis_move_control_loop);
+	
+	//底盘速度获取
+	Chassis_AGV_wheel_speed(chassis_move_control_loop);
+	
+	//转换为机器人坐标系
 	Robot_coordinate(&chassis_move_control_loop->absolute_chassis_speed,final_yaw);
 	
 	//pid计算
-	Remote_pid_caculate(chassis_move_control_loop);
+	Pid_caculate(chassis_move_control_loop);
 
 	//等待6020角度转到位在转3508
 	angle_judge(chassis_move_control_loop);
 }
 
-
-//确定底盘运动速度，世界坐标
-static void Remote_chassis_AGV_wheel_speed(chassis_move_t *chassis_move_control_loop)
+/**
+	* @brief 确定底盘运动速度，世界坐标
+	* @param 底盘结构体
+  * @retval 
+	* @attention	不同模式速度不同
+	*/
+static void Chassis_AGV_wheel_speed(chassis_move_t *chassis_move_control_loop)
 {
 	switch(chassis_move_control_loop->my_remote_mode)
 	{			
@@ -222,7 +209,12 @@ static void Remote_chassis_AGV_wheel_speed(chassis_move_t *chassis_move_control_
 	}
 }
 
-
+/**
+  * @brief  计算底盘驱动电机3508的目标速度
+  * @param  chassis_speed 世界坐标的速度 
+  * @retval 
+  * @attention	wheel_speed 3508目标速度
+  */
 void AGV_Speed_calc(chassis_speed_t *chassis_speed)
 {
 	chassis_move.wheel_speed[0] = chassis_move.drct*sqrt(pow((chassis_speed->Vy-chassis_speed->Vw*0.707f),2)+pow(chassis_speed->Vx+chassis_speed->Vw*0.707f,2));
@@ -231,9 +223,16 @@ void AGV_Speed_calc(chassis_speed_t *chassis_speed)
 	chassis_move.wheel_speed[3] = chassis_move.drct*sqrt(pow((chassis_speed->Vy+chassis_speed->Vw*0.707f),2)+pow(chassis_speed->Vx+chassis_speed->Vw*0.707f,2));
 }
 
-fp64 atan_angle[4];	
+
+/**
+  * @brief  计算底盘驱动电机6020的目标角度
+  * @param  chassis_speed 世界坐标的速度 
+  * @retval 
+  * @attention  AGV_wheel_Angle 6020目标角度
+  */
 void AGV_Angle_calc(chassis_speed_t *chassis_speed)
 {
+	static fp64 atan_angle[4];
 	static fp32 AGV_wheel_Angle_last[4];
 	switch(chassis_move.my_remote_mode)
 	{
@@ -274,6 +273,13 @@ void AGV_Angle_calc(chassis_speed_t *chassis_speed)
 	}
 }
 
+/**
+	* @brief  遥控器死区控制和数值滤波
+  * @param  底盘总结构体
+	* @param  vx,y,z_channel 加过死区后的遥控器数值
+  * @retval 
+  * @attention	对输出数值进行了一阶低通滤波
+  */
 //遥控器数值获取加死区限制
 void chassis_rc_to_control_vector(chassis_move_t *chassis_move_rc_to_vector)
 {
@@ -302,6 +308,14 @@ void chassis_rc_to_control_vector(chassis_move_t *chassis_move_rc_to_vector)
 //	chassis_move_rc_to_vector->wz_set = chassis_move_rc_to_vector->vy_set_channel/19*WHEEL_CIRCUMFERENCE/MOTOR_DISTANCE_TO_CENTER;	
 }
 
+
+/**
+	* @brief  将世界坐标下的Vx,Vy,Vw转换为机器人坐标
+  * @param  wrold_speed 世界坐标速度
+	* @param 	angle 底盘与云台的yaw_diff
+  * @retval 
+  * @attention	
+  */
 void Robot_coordinate(chassis_speed_t * wrold_speed, fp32 angle)
 {
     fp32 angle_diff=angle* PI / 180;
@@ -314,8 +328,13 @@ void Robot_coordinate(chassis_speed_t * wrold_speed, fp32 angle)
     AGV_Speed_calc(&temp_speed);//3508
 }
 
-//pid计算
-void Remote_pid_caculate(chassis_move_t *chassis_move_control_loop)
+/**
+	* @brief  PID计算
+  * @param  底盘结构体
+  * @retval 
+  * @attention	3508单速度环，6020角度环+速度环
+  */
+void Pid_caculate(chassis_move_t *chassis_move_control_loop)
 {
 	for (int i = 0; i < 4; i++)
 		{
@@ -335,9 +354,13 @@ void Remote_pid_caculate(chassis_move_t *chassis_move_control_loop)
 		}
 }
 
-/*-----------------------------------------------------------------------------------------------公共函数---------------------------------------------------------------------------------------------------*/
 
-//将电机转子转向内侧时 修正方向
+/**
+	* @brief 当电机转子转向内侧时 修正方向0-8191
+	* @param  angle1,angle2 一个为目标角度，一个为当前角度
+  * @retval 角度差值
+  * @attention	返回的差值是经过计算后限制在0-8191之间的
+  */
 fp32 Find_min_Angle(int16_t angle1,fp32 angle2)
 {
 	fp32 err;
@@ -349,8 +372,12 @@ fp32 Find_min_Angle(int16_t angle1,fp32 angle2)
     return err;
 }
 
-
-//等待6020角度转到位在转3508
+/**
+	* @brief 等待6020角度转到位在转3508
+	* @param 底盘结构体
+  * @retval 
+  * @attention	
+  */
 void angle_judge(chassis_move_t *chassis_move_control_loop)
 {
 	if(fabs(chassis_move_control_loop->motor_chassis[4].chassis_motor_measure->ecd - chassis_move_control_loop->AGV_wheel_Angle[0]) < 1000)//当角度偏差为50时使能3508转动
@@ -359,8 +386,12 @@ void angle_judge(chassis_move_t *chassis_move_control_loop)
 		chassis_move_control_loop->angle_ready=0;
 }
 
-
-//判断优弧劣弧-->只转3508，不转6020，把6020角度控制在0-90度内，可以更好的转换运动方向
+/**
+	* @brief 判断优弧劣弧-->只转3508，不转6020，把6020角度控制在0-90度内，可以更好的转换运动方向
+	* @param 底盘结构体
+  * @retval 
+  * @attention	
+	*/
 void Speed_Toggle(chassis_move_t *chassis_move_control_Speed)
 {
 		if(fabs(Find_min_Angle(chassis_move_control_Speed->motor_chassis[4].chassis_motor_measure->ecd,chassis_move_control_Speed->AGV_wheel_Angle[0]))>2048)
@@ -377,7 +408,12 @@ void Speed_Toggle(chassis_move_t *chassis_move_control_Speed)
 }
 
 
-//清除PID
+/**
+	* @brief 清除pid
+	* @param 底盘结构体
+  * @retval 
+  * @attention	
+	*/
 static void PID_CLEAR_ALL(chassis_move_t *chassis_move_data)
 {
 	for(uint8_t i=0;i<4;i++)
