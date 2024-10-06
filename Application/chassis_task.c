@@ -231,10 +231,12 @@ static void Chassis_AGV_wheel_speed(chassis_move_t *chassis_move_control_loop)
   */
 void AGV_Speed_calc(chassis_speed_t *chassis_speed)
 {
-	chassis_move.wheel_speed[0] = chassis_move.drct*sqrt(pow((chassis_speed->Vy-chassis_speed->Vw*0.707f),2)+pow(chassis_speed->Vx+chassis_speed->Vw*0.707f,2));
-	chassis_move.wheel_speed[1] = chassis_move.drct*sqrt(pow((chassis_speed->Vy-chassis_speed->Vw*0.707f),2)+pow(chassis_speed->Vx-chassis_speed->Vw*0.707f,2));
-	chassis_move.wheel_speed[2] = chassis_move.drct*sqrt(pow((chassis_speed->Vy+chassis_speed->Vw*0.707f),2)+pow(chassis_speed->Vx-chassis_speed->Vw*0.707f,2));
-	chassis_move.wheel_speed[3] = chassis_move.drct*sqrt(pow((chassis_speed->Vy+chassis_speed->Vw*0.707f),2)+pow(chassis_speed->Vx+chassis_speed->Vw*0.707f,2));
+
+		chassis_move.wheel_speed[0] = chassis_move.drct*sqrt(pow((chassis_speed->Vy - chassis_speed->Vw*0.707f),2)+pow(chassis_speed->Vx + chassis_speed->Vw*0.707f,2));
+    chassis_move.wheel_speed[1] = chassis_move.drct*sqrt(pow((chassis_speed->Vy - chassis_speed->Vw*0.707f),2)+pow(chassis_speed->Vx - chassis_speed->Vw*0.707f,2));
+	  chassis_move.wheel_speed[2] = chassis_move.drct*sqrt(pow((chassis_speed->Vy + chassis_speed->Vw*0.707f),2)+pow(chassis_speed->Vx - chassis_speed->Vw*0.707f,2));
+	  chassis_move.wheel_speed[3] = chassis_move.drct*sqrt(pow((chassis_speed->Vy + chassis_speed->Vw*0.707f),2)+pow(chassis_speed->Vx + chassis_speed->Vw*0.707f,2));
+
 }
 
 
@@ -252,11 +254,12 @@ void AGV_Angle_calc(chassis_speed_t *chassis_speed)
 	{
 		//右中
 		case CHASSIS_RC_TOP_MOVE:
-
 					atan_angle[0]=atan2(chassis_speed->Vy - chassis_speed->Vw*0.707f,chassis_speed->Vx + chassis_speed->Vw*0.707f)/PI*180.0;
 					atan_angle[1]=atan2(chassis_speed->Vy - chassis_speed->Vw*0.707f,chassis_speed->Vx - chassis_speed->Vw*0.707f)/PI*180.0;
 					atan_angle[2]=atan2(chassis_speed->Vy + chassis_speed->Vw*0.707f,chassis_speed->Vx - chassis_speed->Vw*0.707f)/PI*180.0;
 					atan_angle[3]=atan2(chassis_speed->Vy + chassis_speed->Vw*0.707f,chassis_speed->Vx + chassis_speed->Vw*0.707f)/PI*180.0;
+					
+
 					// 将一圈360°转换成编码值的一圈0-8191 -> 角度 * 8191 / 360 最终转换为需要转动的角度对应的编码值，再加上偏置角度,最终得到目标编码值
 					chassis_move.AGV_wheel_Angle[0]=	Angle_Limit(GIM_Y_ECD_1 + (fp32)(atan_angle[0] * 22.75f),ECD_RANGE);
 					chassis_move.AGV_wheel_Angle[1]=	Angle_Limit(GIM_Y_ECD_2 + (fp32)(atan_angle[1] * 22.75f),ECD_RANGE);
@@ -340,24 +343,17 @@ void Chassis_rc_to_control_vector(chassis_move_t *chassis_move_rc_to_vector)
   */
 void Robot_coordinate(chassis_speed_t * wrold_speed, fp32 angle)
 {
-    fp32 angle_diff=angle* PI / 180;
-    chassis_speed_t temp_speed;
-    temp_speed.Vw = wrold_speed->Vw; 
-
-		if(temp_speed.Vw>=0)
-		{
-			temp_speed.Vx = wrold_speed->Vx * cos(angle_diff) + wrold_speed->Vy * sin(angle_diff);
-			temp_speed.Vy = -wrold_speed->Vx * sin(angle_diff) + wrold_speed->Vy * cos(angle_diff);
-
-		}
-		else
-			{
-		 temp_speed.Vx = wrold_speed->Vx * cos(angle_diff) - wrold_speed->Vy * sin(angle_diff);
-	   temp_speed.Vy = wrold_speed->Vx * sin(angle_diff) + wrold_speed->Vy * cos(angle_diff);
-		}
+   fp32 angle_diff=angle* PI / 180;
+   chassis_speed_t temp_speed;
+   temp_speed.Vw = wrold_speed->Vw; 
+		
+	 temp_speed.Vx = wrold_speed->Vx * cos(angle_diff) - wrold_speed->Vy * sin(angle_diff);
+	 temp_speed.Vy = wrold_speed->Vx * sin(angle_diff) + wrold_speed->Vy * cos(angle_diff);
+		
 	
-		AGV_Angle_calc(&temp_speed);//6020
-    AGV_Speed_calc(&temp_speed);//3508
+	
+	 AGV_Angle_calc(&temp_speed);//6020
+   AGV_Speed_calc(&temp_speed);//3508
 }
 
 /**
